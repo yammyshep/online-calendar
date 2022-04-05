@@ -1,0 +1,87 @@
+Table users {
+  id integer [primary key]
+  email varchar
+  pass varchar [note: "hashed and salted"]
+  created_at timestamp
+}
+
+Table calendar {
+  id integer [primary key]
+  name varchar
+  description varchar
+  color integer
+  icon varchar
+}
+
+enum AccessLevel {
+  owner
+  fullaccess
+  readonly
+  revoked
+}
+
+Table calendar_access {
+  userid integer
+  calendarid integer
+  accesslevel AccessLevel
+}
+
+Ref: calendar_access.userid > users.id
+Ref: calendar_access.calendarid > calendar.id
+
+Table event {
+  id integer [primary key]
+  calendar integer
+  title varchar
+  location varchar
+  description varchar
+}
+
+Ref: event.calendar > calendar.id
+
+Table reminder {
+  id integer [primary key]
+  event integer
+  time timestamp
+}
+
+Ref: reminder.event > event.id
+
+Table event_access {
+  userid integer
+  eventid integer
+  accesslevel AccessLevel
+}
+
+Ref: event_access.userid > users.id
+Ref:event_access.eventid > event.id
+
+Table calendar_invite {
+  fromuser integer
+  touser integer
+  calendar integer
+  accesslevel AccessLevel
+  expires timestamp
+}
+
+
+Ref: "users"."id" < "calendar_invite"."fromuser"
+
+Ref: "users"."id" < "calendar_invite"."touser"
+
+
+Ref: "calendar"."id" < "calendar_invite"."calendar"
+
+Table event_invite {
+  fromuser integer
+  touser integer
+  event integer
+  accesslevel AccessLevel
+  expires timestamp
+}
+
+Ref: "users"."id" < "event_invite"."fromuser"
+
+Ref: "users"."id" < "event_invite"."touser"
+
+Ref: "event"."id" < "event_invite"."event"
